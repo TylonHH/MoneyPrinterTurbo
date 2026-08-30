@@ -1,0 +1,77 @@
+captainVersion: 4
+
+services:
+  $$cap_appname:
+    image: ghcr.io/harry0703/moneyprinterturbo:$$cap_mpt_version
+    restart: unless-stopped
+    volumes:
+      - $$cap_appname-data:/persistent
+    command: >-
+      /bin/sh -c '
+      mkdir -p /persistent/storage &&
+      if [ ! -f /persistent/config.toml ]; then cp /MoneyPrinterTurbo/config.example.toml /persistent/config.toml; fi &&
+      rm -rf /MoneyPrinterTurbo/storage &&
+      ln -s /persistent/storage /MoneyPrinterTurbo/storage &&
+      ln -sf /persistent/config.toml /MoneyPrinterTurbo/config.toml &&
+      exec streamlit run ./webui/Main.py
+      --server.address=0.0.0.0
+      --server.port=8501
+      --browser.serverAddress=127.0.0.1
+      --server.enableCORS=True
+      --browser.gatherUsageStats=False
+      --client.toolbarMode=minimal
+      --logger.hideWelcomeMessage=True
+      --server.showEmailPrompt=False'
+    caproverExtra:
+      containerHttpPort: '8501'
+
+  $$cap_appname-api:
+    image: ghcr.io/harry0703/moneyprinterturbo:$$cap_mpt_version
+    restart: unless-stopped
+    volumes:
+      - $$cap_appname-data:/persistent
+    command: >-
+      /bin/sh -c '
+      mkdir -p /persistent/storage &&
+      if [ ! -f /persistent/config.toml ]; then cp /MoneyPrinterTurbo/config.example.toml /persistent/config.toml; fi &&
+      rm -rf /MoneyPrinterTurbo/storage &&
+      ln -s /persistent/storage /MoneyPrinterTurbo/storage &&
+      ln -sf /persistent/config.toml /MoneyPrinterTurbo/config.toml &&
+      exec python3 main.py'
+    caproverExtra:
+      notExposeAsWebApp: 'true'
+
+caproverOneClickApp:
+  variables:
+    - id: $$cap_mpt_version
+      label: MoneyPrinterTurbo image tag
+      defaultValue: latest
+      description: Docker image tag from ghcr.io/harry0703/moneyprinterturbo. Use latest for upstream's current release image.
+      validRegex: /^([^\s\/])+$/
+
+  instructions:
+    start: |-
+      Deploy MoneyPrinterTurbo on CapRover using the official upstream GHCR image.
+
+      This template creates:
+      - a public Streamlit WebUI on port 8501
+      - an internal API service on port 8080
+      - one shared persistent volume for generated files and config.toml
+
+      API keys are NOT stored in this template or Git repository. Configure providers after deployment through MoneyPrinterTurbo's WebUI/configuration.
+
+    end: |-
+      MoneyPrinterTurbo is deployed at http://$$cap_appname.$$cap_root_domain
+
+      Recommended next steps:
+      1. Enable HTTPS for $$cap_appname in CapRover.
+      2. Protect the WebUI with CapRover HTTP Basic Auth unless you intentionally want it public.
+      3. Open the WebUI and configure your LLM, stock-video and TTS providers.
+      4. The API service remains internal as srv-captain--$$cap_appname-api:8080.
+
+      The named volume $$cap_appname-data keeps both /storage data and config.toml across container updates.
+
+  displayName: MoneyPrinterTurbo
+  isOfficial: false
+  description: Self-hosted AI short-video generator with WebUI, internal API and persistent configuration/storage.
+  documentation: https://github.com/TylonHH/MoneyPrinterTurbo
