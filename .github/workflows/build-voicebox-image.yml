@@ -37,8 +37,8 @@ jobs:
           file: ./Dockerfile.voicebox
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/moneyprinterturbo:voicebox
-            ghcr.io/${{ github.repository_owner }}/moneyprinterturbo:latest
+            ghcr.io/tylonhh/moneyprinterturbo:voicebox
+            ghcr.io/tylonhh/moneyprinterturbo:latest
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.description=MoneyPrinterTurbo with native self-hosted Voicebox TTS support
