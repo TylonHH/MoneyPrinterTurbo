@@ -3,9 +3,11 @@ FROM ghcr.io/harry0703/moneyprinterturbo:latest
 WORKDIR /MoneyPrinterTurbo
 
 COPY patches/enable_voicebox.py /tmp/enable_voicebox.py
+COPY patches/fix_voicebox_result.py /tmp/fix_voicebox_result.py
 RUN python /tmp/enable_voicebox.py \
+    && python /tmp/fix_voicebox_result.py \
     && python -m py_compile app/config/config.py app/services/voice.py webui/Main.py \
-    && rm -f /tmp/enable_voicebox.py
+    && rm -f /tmp/enable_voicebox.py /tmp/fix_voicebox_result.py
 
 EXPOSE 8501
 
