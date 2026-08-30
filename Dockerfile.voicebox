@@ -1,0 +1,12 @@
+FROM ghcr.io/harry0703/moneyprinterturbo:latest
+
+WORKDIR /MoneyPrinterTurbo
+
+COPY patches/enable_voicebox.py /tmp/enable_voicebox.py
+RUN python /tmp/enable_voicebox.py \
+    && python -m py_compile app/config/config.py app/services/voice.py webui/Main.py \
+    && rm -f /tmp/enable_voicebox.py
+
+EXPOSE 8501
+
+CMD ["streamlit", "run", "./webui/Main.py", "--server.address=0.0.0.0", "--server.port=8501", "--browser.serverAddress=127.0.0.1", "--server.enableCORS=True", "--browser.gatherUsageStats=False", "--client.toolbarMode=minimal", "--logger.hideWelcomeMessage=True", "--server.showEmailPrompt=False"]
