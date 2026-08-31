@@ -5,12 +5,14 @@ WORKDIR /MoneyPrinterTurbo
 COPY patches/enable_voicebox.py /tmp/enable_voicebox.py
 COPY patches/fix_voicebox_result.py /tmp/fix_voicebox_result.py
 COPY patches/add_voicebox_basic_auth.py /tmp/add_voicebox_basic_auth.py
+COPY patches/wait_for_voicebox_generation.py /tmp/wait_for_voicebox_generation.py
 RUN python /tmp/enable_voicebox.py \
     && python /tmp/fix_voicebox_result.py \
     && python /tmp/add_voicebox_basic_auth.py \
+    && python /tmp/wait_for_voicebox_generation.py \
     && sed -i 's#http://srv-captain--voicebox#http://srv-captain--voicebox:17493#g' app/services/voice.py config.example.toml \
     && python -m py_compile app/config/config.py app/services/voice.py webui/Main.py \
-    && rm -f /tmp/enable_voicebox.py /tmp/fix_voicebox_result.py /tmp/add_voicebox_basic_auth.py
+    && rm -f /tmp/enable_voicebox.py /tmp/fix_voicebox_result.py /tmp/add_voicebox_basic_auth.py /tmp/wait_for_voicebox_generation.py
 
 EXPOSE 8501
 
